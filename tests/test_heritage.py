@@ -1,11 +1,11 @@
 
 import unittest
 
-from heritage.database import Database
-from heritage.errors import PermissionDenied, RecordNotFound, ValidationError
-from heritage.roles import Role
-from heritage.services import EVENTS, TRADITIONS, HeritageService
-from heritage.validators import clean_date, clean_record_id, clean_text
+from architecture.database import Database
+from architecture.errors import PermissionDenied, RecordNotFound, ValidationError
+from architecture.roles import Role
+from architecture.services import EVENTS, TRADITIONS, HeritageService
+from architecture.validators import clean_date, clean_record_id, clean_text
 
 
 class ValidatorTests(unittest.TestCase):
