@@ -2,7 +2,7 @@
 import unittest
 
 from architecture.database import Database
-from architecture.errors import PermissionDenied, RecordNotFound, ValidationError
+from architecture.errors import DuplicateRecord, PermissionDenied, RecordNotFound, ValidationError
 from architecture.roles import Role
 from architecture.services import EVENTS, TRADITIONS, HeritageService
 from architecture.validators import clean_date, clean_record_id, clean_text
@@ -112,6 +112,39 @@ class ServiceTests(unittest.TestCase):
         with self.assertRaises(PermissionDenied):
             self.volunteer.delete_record(EVENTS, record_id)
         self.assertEqual(len(self.organizer.list_events()), 1)
+
+    def test_same_name_and_community_are_allowed(self):
+        self.organizer.add_tradition("Umuganura", "Rwandan farmers", "Harvest festival in Kigali")
+        self.organizer.add_tradition("Umuganura", "Rwandan farmers", "Harvest festival in Musanze")
+        self.assertEqual(len(self.organizer.list_traditions()), 2)
+
+    def test_duplicate_description_is_rejected(self):
+        self.organizer.add_tradition("Umuganura", "Rwandan farmers", "Harvest festival")
+        with self.assertRaises(DuplicateRecord):
+            self.organizer.add_tradition("Other name", "Other community", "Harvest festival")
+        self.assertEqual(len(self.organizer.list_traditions()), 1)
+
+    def test_duplicate_description_ignores_case_and_extra_spaces(self):
+        self.organizer.add_tradition("Umuganura", "Rwandan farmers", "Harvest festival")
+        with self.assertRaises(DuplicateRecord):
+            self.organizer.add_tradition("Other", "Other", "  HARVEST    festival ")
+
+    def test_check_description_available_reports_taken_text(self):
+        self.organizer.add_tradition("Igisoro", "Village elders", "Board game")
+        with self.assertRaises(DuplicateRecord):
+            self.organizer.check_description_available("board game")
+        self.assertEqual(self.organizer.check_description_available("New story"), "New story")
+
+    def test_update_can_keep_own_description(self):
+        record_id = self.organizer.add_tradition("Name", "Community", "Unique text")
+        self.organizer.update_tradition(record_id, "Renamed", "Community", "Unique text")
+        self.assertEqual(self.organizer.get_record(TRADITIONS, record_id)["name"], "Renamed")
+
+    def test_update_cannot_take_another_records_description(self):
+        self.organizer.add_tradition("First", "A", "Text one")
+        second = self.organizer.add_tradition("Second", "B", "Text two")
+        with self.assertRaises(DuplicateRecord):
+            self.organizer.update_tradition(second, "Second", "B", "text ONE")
 
     def test_unknown_table_is_rejected(self):
         with self.assertRaises(ValueError):

@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS traditions (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     name        TEXT NOT NULL,
     community   TEXT NOT NULL,
-    description TEXT NOT NULL,
+    description TEXT NOT NULL UNIQUE COLLATE NOCASE,
     created_by  TEXT NOT NULL
 );
 

@@ -1,7 +1,7 @@
 
 from .errors import HeritageError, ValidationError
 from .roles import Permission, Role
-from .validators import MAX_LONG_TEXT, clean_date, clean_record_id, clean_text
+from .validators import clean_date, clean_record_id, clean_text
 from .services import EVENTS, TRADITIONS
 
 MAIN_MENU = """
@@ -113,9 +113,7 @@ class HeritageCLI:
         print("\n--- Add a cultural tradition ---")
         name = ask("Tradition name: ", lambda v: clean_text(v, "Tradition name"))
         community = ask("Community: ", lambda v: clean_text(v, "Community"))
-        description = ask(
-            "Description: ", lambda v: clean_text(v, "Description", MAX_LONG_TEXT)
-        )
+        description = ask("Description: ", self.service.check_description_available)
         record_id = self.service.add_tradition(name, community, description)
         print(f"  Saved! Tradition #{record_id} '{name}' has been recorded.")
 
@@ -161,7 +159,7 @@ class HeritageCLI:
             description = ask_with_default(
                 "Description",
                 record["description"],
-                lambda v: clean_text(v, "Description", MAX_LONG_TEXT),
+                lambda v: self.service.check_description_available(v, record_id),
             )
             self.service.update_tradition(record_id, name, community, description)
         else:
