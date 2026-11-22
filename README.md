@@ -75,8 +75,6 @@ PLPG3_heritage_app/
 │   ├── roles.py            Roles and the permission matrix
 │   ├── errors.py           Custom exception classes
 │   └── menu.py             Terminal UI: menus, prompts, and result display
-├── tests/
-│   └── test_heritage.py    Unit tests (in-memory database)
 ├── .gitignore
 └── README.md
 ```
@@ -107,18 +105,6 @@ rewriting the others:
 | Role without permission              | Shows a permission message and returns to the menu     |
 | Database error                       | Shows a message instead of crashing                    |
 | Ctrl+C or end of input               | Exits cleanly                                          |
-
-## Running the tests
-
-From the project root:
-
-```bash
-python -m unittest discover -v
-```
-
-The tests cover input validation, record creation, search, update, delete,
-missing-record errors, role permissions, and rejection of unknown table names.
-They use an in-memory database, so they never touch `heritage.db`.
 
 ## Course concepts used
 
