@@ -13,14 +13,13 @@ MAIN_MENU = """
   4. Search records
   5. Update a record
   6. Delete a record
-  7. Change role
   0. Exit
 ======================================================================"""
 
 ROLE_OPTIONS = [Role.ORGANIZER, Role.GROUP_LEADER, Role.VOLUNTEER]
 DIVIDER = "-" * 70
 CANCEL_WORD = "cancel"
-INPUT_ACTIONS = {"1", "2", "4", "5", "6", "7"}
+INPUT_ACTIONS = {"1", "2", "4", "5", "6"}
 
 
 class ActionCancelled(Exception):
@@ -54,14 +53,13 @@ def ask_with_default(prompt, current, cleaner):
             print(f"  ! {exc} Please try again.")
 
 
-def choose_role(can_cancel=False):
+def choose_role():
     print("\nWelcome to the Community Culture & Heritage Manager.")
     print("Select your role:")
     for number, role in enumerate(ROLE_OPTIONS, start=1):
         print(f"  {number}. {role.value}")
     while True:
-        prompt = read if can_cancel else input
-        choice = prompt("Enter role number: ").strip()
+        choice = input("Enter role number: ").strip()
         if choice.isdigit() and 1 <= int(choice) <= len(ROLE_OPTIONS):
             return ROLE_OPTIONS[int(choice) - 1]
         print("  ! Invalid choice. Enter a number from the list.")
@@ -101,7 +99,6 @@ class HeritageCLI:
             "4": self.search_records,
             "5": self.update_record,
             "6": self.delete_record,
-            "7": self.change_role,
         }
 
     def run(self):
@@ -126,16 +123,6 @@ class HeritageCLI:
                 print("  Cancelled. Choose another option from the menu.")
             except HeritageError as exc:
                 print(f"  ! {exc}")
-
-    def change_role(self):
-        print(f"\nCurrent role: {self.service.role.value}")
-        try:
-            new_role = choose_role(can_cancel=True)
-        except ActionCancelled:
-            print("  Role unchanged.")
-            return
-        self.service.change_role(new_role)
-        print(f"  Now acting as: {new_role.value}")
 
     def add_tradition(self):
         if not self.service.can(Permission.CREATE):
