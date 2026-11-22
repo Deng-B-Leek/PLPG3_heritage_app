@@ -2,13 +2,13 @@
 import unittest
 from unittest.mock import patch
 
-from architecture.menu import ActionCancelled, ask, read
+from heritage.menu import ActionCancelled, ask, read
 
-from architecture.database import Database
-from architecture.errors import DuplicateRecord, PermissionDenied, RecordNotFound, ValidationError
-from architecture.roles import Permission, Role
-from architecture.services import EVENTS, TRADITIONS, HeritageService
-from architecture.validators import clean_date, clean_record_id, clean_text
+from heritage.database import Database
+from heritage.errors import DuplicateRecord, PermissionDenied, RecordNotFound, ValidationError
+from heritage.roles import Permission, Role
+from heritage.services import EVENTS, TRADITIONS, HeritageService
+from heritage.validators import clean_date, clean_record_id, clean_text
 
 
 class ValidatorTests(unittest.TestCase):
