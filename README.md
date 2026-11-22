@@ -5,7 +5,6 @@ community cultural organizers, cultural group leaders, and local heritage
 volunteers record cultural traditions and events, search them, and keep them
 up to date. Data is stored in a **SQLite** database.
 
-Built by Group 3 for the Peer Learning Project (PLP-2), BSE Year 1, Trimester 2.
 
 ## Requirements
 
