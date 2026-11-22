@@ -13,16 +13,30 @@ MAIN_MENU = """
   4. Search records
   5. Update a record
   6. Delete a record
+  7. Change role
   0. Exit
 ======================================================================"""
 
 ROLE_OPTIONS = [Role.ORGANIZER, Role.GROUP_LEADER, Role.VOLUNTEER]
 DIVIDER = "-" * 70
+CANCEL_WORD = "cancel"
+INPUT_ACTIONS = {"1", "2", "4", "5", "6", "7"}
+
+
+class ActionCancelled(Exception):
+    pass
+
+
+def read(prompt):
+    raw = input(prompt)
+    if raw.strip().lower() == CANCEL_WORD:
+        raise ActionCancelled()
+    return raw
 
 
 def ask(prompt, cleaner):
     while True:
-        raw = input(prompt)
+        raw = read(prompt)
         try:
             return cleaner(raw)
         except ValidationError as exc:
@@ -31,7 +45,7 @@ def ask(prompt, cleaner):
 
 def ask_with_default(prompt, current, cleaner):
     while True:
-        raw = input(f"{prompt} [{current}]: ")
+        raw = read(f"{prompt} [{current}]: ")
         if not raw.strip():
             return current
         try:
@@ -40,13 +54,14 @@ def ask_with_default(prompt, current, cleaner):
             print(f"  ! {exc} Please try again.")
 
 
-def choose_role():
+def choose_role(can_cancel=False):
     print("\nWelcome to the Community Culture & Heritage Manager.")
     print("Select your role:")
     for number, role in enumerate(ROLE_OPTIONS, start=1):
         print(f"  {number}. {role.value}")
     while True:
-        choice = input("Enter role number: ").strip()
+        prompt = read if can_cancel else input
+        choice = prompt("Enter role number: ").strip()
         if choice.isdigit() and 1 <= int(choice) <= len(ROLE_OPTIONS):
             return ROLE_OPTIONS[int(choice) - 1]
         print("  ! Invalid choice. Enter a number from the list.")
@@ -86,6 +101,7 @@ class HeritageCLI:
             "4": self.search_records,
             "5": self.update_record,
             "6": self.delete_record,
+            "7": self.change_role,
         }
 
     def run(self):
@@ -102,10 +118,24 @@ class HeritageCLI:
                 print("  ! Invalid choice. Please select an option from the menu.")
                 continue
 
+            if choice in INPUT_ACTIONS:
+                print("  (type 'cancel' at any prompt to return to the menu)")
             try:
                 action()
+            except ActionCancelled:
+                print("  Cancelled. Choose another option from the menu.")
             except HeritageError as exc:
                 print(f"  ! {exc}")
+
+    def change_role(self):
+        print(f"\nCurrent role: {self.service.role.value}")
+        try:
+            new_role = choose_role(can_cancel=True)
+        except ActionCancelled:
+            print("  Role unchanged.")
+            return
+        self.service.change_role(new_role)
+        print(f"  Now acting as: {new_role.value}")
 
     def add_tradition(self):
         if not self.service.can(Permission.CREATE):
@@ -181,7 +211,7 @@ class HeritageCLI:
         record = self.service.get_record(table, record_id)
         label = record.get("name") or record.get("event_name")
 
-        confirm = input(f"  Type 'yes' to permanently delete '{label}': ").strip().lower()
+        confirm = read(f"  Type 'yes' to permanently delete '{label}': ").strip().lower()
         if confirm != "yes":
             print("  Deletion cancelled.")
             return

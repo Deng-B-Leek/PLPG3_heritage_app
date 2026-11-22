@@ -1,9 +1,12 @@
 
 import unittest
+from unittest.mock import patch
+
+from architecture.menu import ActionCancelled, ask, read
 
 from architecture.database import Database
 from architecture.errors import DuplicateRecord, PermissionDenied, RecordNotFound, ValidationError
-from architecture.roles import Role
+from architecture.roles import Permission, Role
 from architecture.services import EVENTS, TRADITIONS, HeritageService
 from architecture.validators import clean_date, clean_record_id, clean_text
 
@@ -146,9 +149,31 @@ class ServiceTests(unittest.TestCase):
         with self.assertRaises(DuplicateRecord):
             self.organizer.update_tradition(second, "Second", "B", "text ONE")
 
+    def test_change_role_updates_permissions(self):
+        service = HeritageService(self.db, Role.ORGANIZER)
+        self.assertTrue(service.can(Permission.DELETE))
+        service.change_role(Role.VOLUNTEER)
+        self.assertFalse(service.can(Permission.DELETE))
+
     def test_unknown_table_is_rejected(self):
         with self.assertRaises(ValueError):
             self.organizer.delete_record("users; DROP TABLE events", 1)
+
+
+class CancelTests(unittest.TestCase):
+    def test_cancel_word_raises_at_prompt(self):
+        with patch("builtins.input", return_value="cancel"):
+            with self.assertRaises(ActionCancelled):
+                ask("Name: ", lambda v: v)
+
+    def test_cancel_ignores_case_and_spaces(self):
+        with patch("builtins.input", return_value="  CANCEL "):
+            with self.assertRaises(ActionCancelled):
+                read("x")
+
+    def test_text_that_contains_cancel_is_not_a_cancel(self):
+        with patch("builtins.input", return_value="cancelled event"):
+            self.assertEqual(read("x"), "cancelled event")
 
 
 if __name__ == "__main__":
