@@ -27,7 +27,10 @@ Choose your role at startup, then use the menu:
 | 4      | Search records by keyword (bonus)        | All roles                   |
 | 5      | Update a record (bonus)                  | Organizer, Group Leader     |
 | 6      | Delete a record (bonus)                  | Organizer, Group Leader     |
+| 7      | Change role without restarting           | All roles                   |
 | 0      | Exit                                     | All roles                   |
+
+At any input prompt, type `cancel` to stop the action and return to the menu. Choose option 4 to search or option 5 to update.
 
 To use a different database file:
 
@@ -63,7 +66,7 @@ created_by   TEXT (role)           created_by   TEXT (role)
 ```
 PLPG3_heritage_app/
 ├── main.py                 Entry point: opens the DB, picks a role, starts the menu
-├── architecture/
+├── heritage/
 │   ├── __init__.py
 │   ├── database.py         SQLite connection and schema (the only DB connection code)
 │   ├── services.py         Business logic: validation, permissions, CRUD queries
@@ -71,8 +74,6 @@ PLPG3_heritage_app/
 │   ├── roles.py            Roles and the permission matrix
 │   ├── errors.py           Custom exception classes
 │   └── menu.py             Terminal UI: menus, prompts, and result display
-├── tests/
-│   └── test_heritage.py    Unit tests (in-memory database)
 ├── .gitignore
 └── README.md
 ```
@@ -103,18 +104,6 @@ rewriting the others:
 | Role without permission              | Shows a permission message and returns to the menu     |
 | Database error                       | Shows a message instead of crashing                    |
 | Ctrl+C or end of input               | Exits cleanly                                          |
-
-## Running the tests
-
-From the project root:
-
-```bash
-python -m unittest discover -v
-```
-
-The tests cover input validation, record creation, search, update, delete,
-missing-record errors, role permissions, and rejection of unknown table names.
-They use an in-memory database, so they never touch `heritage.db`.
 
 ## Course concepts used
 
