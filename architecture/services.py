@@ -1,7 +1,7 @@
 
 import sqlite3
 
-from .errors import PermissionDenied, RecordNotFound, StorageError
+from .errors import DuplicateRecord, PermissionDenied, RecordNotFound, StorageError
 from .roles import Permission, has_permission
 from .validators import (
     MAX_LONG_TEXT,
@@ -32,6 +32,10 @@ class HeritageService:
     def _write(self, sql, params=()):
         try:
             return self.db.execute(sql, params)
+        except sqlite3.IntegrityError as exc:
+            raise DuplicateRecord(
+                "This description is already used by another tradition."
+            ) from exc
         except sqlite3.Error as exc:
             raise StorageError(f"Could not save changes: {exc}") from exc
 
@@ -45,11 +49,31 @@ class HeritageService:
         if table not in _TABLES:
             raise ValueError(f"Unknown table: {table}")
 
+    def check_description_available(self, description, exclude_id=None):
+        description = clean_text(description, "Description", MAX_LONG_TEXT)
+        try:
+            if exclude_id is None:
+                row = self.db.fetch_one(
+                    "SELECT id FROM traditions WHERE description = ? COLLATE NOCASE",
+                    (description,),
+                )
+            else:
+                row = self.db.fetch_one(
+                    "SELECT id FROM traditions "
+                    "WHERE description = ? COLLATE NOCASE AND id != ?",
+                    (description, exclude_id),
+                )
+        except sqlite3.Error as exc:
+            raise StorageError(f"Could not check descriptions: {exc}") from exc
+        if row is not None:
+            raise DuplicateRecord("This description is already used by another tradition.")
+        return description
+
     def add_tradition(self, name, community, description):
         self._require(Permission.CREATE)
         name = clean_text(name, "Tradition name")
         community = clean_text(community, "Community")
-        description = clean_text(description, "Description", MAX_LONG_TEXT)
+        description = self.check_description_available(description)
         cursor = self._write(
             "INSERT INTO traditions (name, community, description, created_by) "
             "VALUES (?, ?, ?, ?)",
@@ -116,7 +140,7 @@ class HeritageService:
             (
                 clean_text(name, "Tradition name"),
                 clean_text(community, "Community"),
-                clean_text(description, "Description", MAX_LONG_TEXT),
+                self.check_description_available(description, record_id),
                 record_id,
             ),
         )

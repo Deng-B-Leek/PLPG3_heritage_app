@@ -3,9 +3,9 @@ import os
 import sqlite3
 import sys
 
-from heritage.database import DEFAULT_DB_PATH, Database
-from heritage.menu import HeritageCLI, choose_role
-from heritage.services import HeritageService
+from architecture.database import DEFAULT_DB_PATH, Database
+from architecture.menu import HeritageCLI, choose_role
+from architecture.services import HeritageService
 
 
 def main():

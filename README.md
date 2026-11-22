@@ -64,7 +64,7 @@ created_by   TEXT (role)           created_by   TEXT (role)
 ```
 PLPG3_heritage_app/
 ├── main.py                 Entry point: opens the DB, picks a role, starts the menu
-├── heritage/
+├── architecture/
 │   ├── __init__.py
 │   ├── database.py         SQLite connection and schema (the only DB connection code)
 │   ├── services.py         Business logic: validation, permissions, CRUD queries

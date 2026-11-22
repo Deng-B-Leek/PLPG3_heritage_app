@@ -16,3 +16,7 @@ class RecordNotFound(HeritageError):
 
 class StorageError(HeritageError):
     pass
+
+
+class DuplicateRecord(ValidationError):
+    pass
