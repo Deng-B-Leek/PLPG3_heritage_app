@@ -18,24 +18,11 @@ MAIN_MENU = """
 
 ROLE_OPTIONS = [Role.ORGANIZER, Role.GROUP_LEADER, Role.VOLUNTEER]
 DIVIDER = "-" * 70
-CANCEL_WORD = "cancel"
-INPUT_ACTIONS = {"1", "2", "4", "5", "6"}
-
-
-class ActionCancelled(Exception):
-    pass
-
-
-def read(prompt):
-    raw = input(prompt)
-    if raw.strip().lower() == CANCEL_WORD:
-        raise ActionCancelled()
-    return raw
 
 
 def ask(prompt, cleaner):
     while True:
-        raw = read(prompt)
+        raw = input(prompt)
         try:
             return cleaner(raw)
         except ValidationError as exc:
@@ -44,7 +31,7 @@ def ask(prompt, cleaner):
 
 def ask_with_default(prompt, current, cleaner):
     while True:
-        raw = read(f"{prompt} [{current}]: ")
+        raw = input(f"{prompt} [{current}]: ")
         if not raw.strip():
             return current
         try:
@@ -115,12 +102,8 @@ class HeritageCLI:
                 print("  ! Invalid choice. Please select an option from the menu.")
                 continue
 
-            if choice in INPUT_ACTIONS:
-                print("  (type 'cancel' at any prompt to return to the menu)")
             try:
                 action()
-            except ActionCancelled:
-                print("  Cancelled. Choose another option from the menu.")
             except HeritageError as exc:
                 print(f"  ! {exc}")
 
@@ -198,7 +181,7 @@ class HeritageCLI:
         record = self.service.get_record(table, record_id)
         label = record.get("name") or record.get("event_name")
 
-        confirm = read(f"  Type 'yes' to permanently delete '{label}': ").strip().lower()
+        confirm = input(f"  Type 'yes' to permanently delete '{label}': ").strip().lower()
         if confirm != "yes":
             print("  Deletion cancelled.")
             return

@@ -29,7 +29,7 @@ Choose your role at startup, then use the menu:
 | 6      | Delete a record (bonus)                  | Organizer, Group Leader     |
 | 0      | Exit                                     | All roles                   |
 
-At any input prompt, type `cancel` to stop the action and return to the menu. Choose option 4 to search or option 5 to update.
+Option 4 searches the saved records, and option 5 updates a record.
 
 To use a different database file:
 
