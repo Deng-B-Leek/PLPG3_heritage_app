@@ -27,7 +27,6 @@ Choose your role at startup, then use the menu:
 | 4      | Search records by keyword (bonus)        | All roles                   |
 | 5      | Update a record (bonus)                  | Organizer, Group Leader     |
 | 6      | Delete a record (bonus)                  | Organizer, Group Leader     |
-| 7      | Change role without restarting           | All roles                   |
 | 0      | Exit                                     | All roles                   |
 
 At any input prompt, type `cancel` to stop the action and return to the menu. Choose option 4 to search or option 5 to update.

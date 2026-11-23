@@ -20,9 +20,6 @@ class HeritageService:
         self.db = db
         self.role = role
 
-    def change_role(self, role):
-        self.role = role
-
     def can(self, permission):
         return has_permission(self.role, permission)
 
