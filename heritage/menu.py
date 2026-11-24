@@ -16,7 +16,7 @@ MAIN_MENU = """
   0. Exit
 ======================================================================"""
 
-ROLE_OPTIONS = [Role.ORGANIZER, Role.GROUP_LEADER, Role.VOLUNTEER]
+ROLE_OPTIONS = [Role.HEAD_OF_CULTURE, Role.CULTURE_CHIEF, Role.LOCAL_MEMBER]
 DIVIDER = "-" * 70
 
 

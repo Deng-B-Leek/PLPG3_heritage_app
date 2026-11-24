@@ -25,8 +25,8 @@ Choose your role at startup, then use the menu:
 | 2      | Record a cultural event                  | All roles                   |
 | 3      | View saved records                       | All roles                   |
 | 4      | Search records by keyword (bonus)        | All roles                   |
-| 5      | Update a record (bonus)                  | Organizer, Group Leader     |
-| 6      | Delete a record (bonus)                  | Organizer, Group Leader     |
+| 5      | Update a record (bonus)                  | Head of Culture, Culture Chief |
+| 6      | Delete a record (bonus)                  | Head of Culture             |
 | 0      | Exit                                     | All roles                   |
 
 Option 4 searches the saved records, and option 5 updates a record.
@@ -41,9 +41,9 @@ HERITAGE_DB=my_archive.db python main.py
 
 | Role                          | Create | Read | Update | Delete |
 |-------------------------------|:------:|:----:|:------:|:------:|
-| Community Cultural Organizer  |   ✔    |  ✔   |   ✔    |   ✔    |
-| Cultural Group Leader         |   ✔    |  ✔   |   ✔    |   ✔    |
-| Local Heritage Volunteer      |   ✔    |  ✔   |        |        |
+| Head of Culture               |   ✔    |  ✔   |   ✔    |   ✔    |
+| Culture Chief                 |   ✔    |  ✔   |   ✔    |        |
+| Local Member                  |   ✔    |  ✔   |        |        |
 
 Each record stores the role that created it, so the database shows who recorded
 what. Permissions are enforced in the service layer, not only in the menu.
