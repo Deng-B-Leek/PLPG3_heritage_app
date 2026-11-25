@@ -1,7 +1,5 @@
-
 import os
 import sqlite3
-import sys
 
 from heritage.database import DEFAULT_DB_PATH, Database
 from heritage.menu import HeritageCLI, choose_role
@@ -13,9 +11,8 @@ def main():
     try:
         db = Database(db_path)
     except sqlite3.Error as exc:
-        print(f"Could not open the database at '{db_path}': {exc}")
-        return 1
-
+        print(f"Could not open database: {exc}")
+        return
     try:
         role = choose_role()
         service = HeritageService(db, role)
@@ -24,8 +21,7 @@ def main():
         print("\nExiting. Goodbye!")
     finally:
         db.close()
-    return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
