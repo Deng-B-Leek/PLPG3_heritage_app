@@ -5,17 +5,30 @@ from .validators import MAX_LONG_TEXT, clean_date, clean_record_id, clean_text
 
 TRADITIONS = "traditions"
 EVENTS = "events"
-TABLES = [TRADITIONS, EVENTS]
+COLUMNS = {
+    TRADITIONS: ["id", "name", "community", "description", "created_by"],
+    EVENTS: ["id", "event_name", "event_date", "location", "created_by"],
+}
+LIST_ALL = {
+    TRADITIONS: "SELECT id, name, community, description, created_by FROM traditions ORDER BY id",
+    EVENTS: "SELECT id, event_name, event_date, location, created_by FROM events ORDER BY event_date, id",
+}
+LIST_MATCH = {
+    TRADITIONS: "SELECT id, name, community, description, created_by FROM traditions "
+                "WHERE name LIKE ? OR community LIKE ? ORDER BY id",
+    EVENTS: "SELECT id, event_name, event_date, location, created_by FROM events "
+            "WHERE event_name LIKE ? OR location LIKE ? ORDER BY event_date, id",
+}
 
-TRADITION_COLUMNS = ["id", "name", "community", "description", "created_by"]
-EVENT_COLUMNS = ["id", "event_name", "event_date", "location", "created_by"]
 
-
-def row_to_dict(columns, row):
-    record = {}
-    for i in range(len(columns)):
-        record[columns[i]] = row[i]
-    return record
+def to_dicts(columns, rows):
+    records = []
+    for row in rows:
+        record = {}
+        for i in range(len(columns)):
+            record[columns[i]] = row[i]
+        records.append(record)
+    return records
 
 
 class HeritageService:
@@ -28,9 +41,11 @@ class HeritageService:
 
     def _require(self, permission):
         if not self.can(permission):
-            raise ValueError(
-                f"The role '{self.role}' is not allowed to {permission} records."
-            )
+            raise ValueError(f"The role '{self.role}' is not allowed to {permission} records.")
+
+    def _check_table(self, table):
+        if table not in COLUMNS:
+            raise ValueError(f"Unknown table: {table}")
 
     def _write(self, sql, params=()):
         try:
@@ -45,19 +60,12 @@ class HeritageService:
             raise ValueError(f"Could not read records: {exc}")
 
     def _last_id(self, table):
-        rows = self._read(f"SELECT MAX(id) FROM {table}")
-        return rows[0][0]
-
-    def _check_table(self, table):
-        if table not in TABLES:
-            raise ValueError(f"Unknown table: {table}")
+        return self._read(f"SELECT MAX(id) FROM {table}")[0][0]
 
     def check_description_available(self, description, exclude_id=None):
         description = clean_text(description, "Description", MAX_LONG_TEXT)
-        rows = self._read("SELECT id, description FROM traditions")
-        wanted = description.lower()
-        for row in rows:
-            if row[1].lower() == wanted and row[0] != exclude_id:
+        for row in self._read("SELECT id, description FROM traditions"):
+            if row[1].lower() == description.lower() and row[0] != exclude_id:
                 raise ValueError("This description is already used by another tradition.")
         return description
 
@@ -83,42 +91,15 @@ class HeritageService:
         )
         return self._last_id(EVENTS)
 
-    def list_traditions(self, keyword=None):
+    def list_records(self, table, keyword=None):
         self._require(READ)
+        self._check_table(table)
         if keyword:
             pattern = f"%{keyword.strip()}%"
-            rows = self._read(
-                "SELECT id, name, community, description, created_by FROM traditions "
-                "WHERE name LIKE ? OR community LIKE ? ORDER BY id",
-                (pattern, pattern),
-            )
+            rows = self._read(LIST_MATCH[table], (pattern, pattern))
         else:
-            rows = self._read(
-                "SELECT id, name, community, description, created_by FROM traditions ORDER BY id"
-            )
-        records = []
-        for row in rows:
-            records.append(row_to_dict(TRADITION_COLUMNS, row))
-        return records
-
-    def list_events(self, keyword=None):
-        self._require(READ)
-        if keyword:
-            pattern = f"%{keyword.strip()}%"
-            rows = self._read(
-                "SELECT id, event_name, event_date, location, created_by FROM events "
-                "WHERE event_name LIKE ? OR location LIKE ? ORDER BY event_date, id",
-                (pattern, pattern),
-            )
-        else:
-            rows = self._read(
-                "SELECT id, event_name, event_date, location, created_by FROM events "
-                "ORDER BY event_date, id"
-            )
-        records = []
-        for row in rows:
-            records.append(row_to_dict(EVENT_COLUMNS, row))
-        return records
+            rows = self._read(LIST_ALL[table])
+        return to_dicts(COLUMNS[table], rows)
 
     def get_record(self, table, record_id):
         self._require(READ)
@@ -127,14 +108,11 @@ class HeritageService:
         rows = self._read(f"SELECT * FROM {table} WHERE id = ?", (record_id,))
         if not rows:
             raise ValueError(f"No record with ID {record_id} was found.")
-        if table == TRADITIONS:
-            return row_to_dict(TRADITION_COLUMNS, rows[0])
-        return row_to_dict(EVENT_COLUMNS, rows[0])
+        return to_dicts(COLUMNS[table], rows)[0]
 
     def update_tradition(self, record_id, name, community, description):
         self._require(UPDATE)
-        self.get_record(TRADITIONS, record_id)
-        record_id = clean_record_id(record_id)
+        record_id = self.get_record(TRADITIONS, record_id)["id"]
         name = clean_text(name, "Tradition name")
         community = clean_text(community, "Community")
         description = self.check_description_available(description, record_id)
@@ -145,8 +123,7 @@ class HeritageService:
 
     def update_event(self, record_id, event_name, event_date, location):
         self._require(UPDATE)
-        self.get_record(EVENTS, record_id)
-        record_id = clean_record_id(record_id)
+        record_id = self.get_record(EVENTS, record_id)["id"]
         event_name = clean_text(event_name, "Event name")
         event_date = clean_date(event_date)
         location = clean_text(location, "Location")
@@ -157,7 +134,5 @@ class HeritageService:
 
     def delete_record(self, table, record_id):
         self._require(DELETE)
-        self._check_table(table)
-        self.get_record(table, record_id)
-        record_id = clean_record_id(record_id)
+        record_id = self.get_record(table, record_id)["id"]
         self._write(f"DELETE FROM {table} WHERE id = ?", (record_id,))
