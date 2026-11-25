@@ -78,7 +78,7 @@ To use a different file, set the `HERITAGE_DB` environment variable before you r
 ## 8. Files
 
 ```
-PLPG3_heritage_app/
+PLPG3_CULTURE_app/
 ├── main.py                 Starts the program and closes it
 ├── README.md               This guide
 ├── .gitignore              Files Git should ignore (for example *.db)
