@@ -84,7 +84,6 @@ PLPG3_heritage_app/
 ├── README.md               This guide
 ├── .gitignore              Files Git should ignore (for example *.db)
 └── heritage/
-    ├── __init__.py         Marks the folder as a Python package
     ├── menu.py             User interface: menu, questions, results
     ├── roles.py            Roles and what each role may do
     ├── services.py         Features: add, view, search, update, delete
