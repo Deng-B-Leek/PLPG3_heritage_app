@@ -1,28 +1,20 @@
+HEAD_OF_CULTURE = "Head of Culture"
+CULTURE_CHIEF = "Culture Chief"
+LOCAL_MEMBER = "Local Member"
 
-from enum import Enum
+ROLES = [HEAD_OF_CULTURE, CULTURE_CHIEF, LOCAL_MEMBER]
 
-
-class Role(Enum):
-    HEAD_OF_CULTURE = "Head of Culture"
-    CULTURE_CHIEF = "Culture Chief"
-    LOCAL_MEMBER = "Local Member"
-
-
-class Permission(Enum):
-    CREATE = "create"
-    READ = "read"
-    UPDATE = "update"
-    DELETE = "delete"
-
-
-_ALL_PERMISSIONS = frozenset(Permission)
+CREATE = "create"
+READ = "read"
+UPDATE = "update"
+DELETE = "delete"
 
 ROLE_PERMISSIONS = {
-    Role.HEAD_OF_CULTURE: _ALL_PERMISSIONS,
-    Role.CULTURE_CHIEF: frozenset({Permission.CREATE, Permission.READ, Permission.UPDATE}),
-    Role.LOCAL_MEMBER: frozenset({Permission.CREATE, Permission.READ}),
+    HEAD_OF_CULTURE: [CREATE, READ, UPDATE, DELETE],
+    CULTURE_CHIEF: [CREATE, READ, UPDATE],
+    LOCAL_MEMBER: [CREATE, READ],
 }
 
 
-def has_permission(role: Role, permission: Permission) -> bool:
+def has_permission(role, permission):
     return permission in ROLE_PERMISSIONS[role]

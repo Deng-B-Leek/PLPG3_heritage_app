@@ -113,7 +113,7 @@ rewriting the others:
 - **SQL**: `CREATE TABLE`, `INSERT`, `SELECT`, `UPDATE`, `DELETE`, and `LIKE`
   search with parameterized queries.
 - **Functions and modules**: each layer lives in its own module.
-- **Enums**: roles and permissions.
+- **Lists and dictionaries**: the list of roles and the permissions for each role.
 
 ## Team
 
