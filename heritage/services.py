@@ -1,6 +1,5 @@
 import sqlite3
 
-from .errors import HeritageError
 from .roles import CREATE, DELETE, READ, UPDATE, has_permission
 from .validators import MAX_LONG_TEXT, clean_date, clean_record_id, clean_text
 
@@ -29,7 +28,7 @@ class HeritageService:
 
     def _require(self, permission):
         if not self.can(permission):
-            raise HeritageError(
+            raise ValueError(
                 f"The role '{self.role}' is not allowed to {permission} records."
             )
 
@@ -37,13 +36,13 @@ class HeritageService:
         try:
             self.db.execute(sql, params)
         except sqlite3.Error as exc:
-            raise HeritageError(f"Could not save changes: {exc}")
+            raise ValueError(f"Could not save changes: {exc}")
 
     def _read(self, sql, params=()):
         try:
             return self.db.fetch_all(sql, params)
         except sqlite3.Error as exc:
-            raise HeritageError(f"Could not read records: {exc}")
+            raise ValueError(f"Could not read records: {exc}")
 
     def _last_id(self, table):
         rows = self._read(f"SELECT MAX(id) FROM {table}")
@@ -59,7 +58,7 @@ class HeritageService:
         wanted = description.lower()
         for row in rows:
             if row[1].lower() == wanted and row[0] != exclude_id:
-                raise HeritageError("This description is already used by another tradition.")
+                raise ValueError("This description is already used by another tradition.")
         return description
 
     def add_tradition(self, name, community, description):
@@ -127,7 +126,7 @@ class HeritageService:
         record_id = clean_record_id(record_id)
         rows = self._read(f"SELECT * FROM {table} WHERE id = ?", (record_id,))
         if not rows:
-            raise HeritageError(f"No record with ID {record_id} was found.")
+            raise ValueError(f"No record with ID {record_id} was found.")
         if table == TRADITIONS:
             return row_to_dict(TRADITION_COLUMNS, rows[0])
         return row_to_dict(EVENT_COLUMNS, rows[0])

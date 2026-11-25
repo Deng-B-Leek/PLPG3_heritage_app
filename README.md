@@ -71,7 +71,6 @@ PLPG3_heritage_app/
 │   ├── services.py         Business logic: validation, permissions, CRUD queries
 │   ├── validators.py       Input cleaning (text, dates, record IDs)
 │   ├── roles.py            Roles and the permission matrix
-│   ├── errors.py           Custom exception classes
 │   └── menu.py             Terminal UI: menus, prompts, and result display
 ├── .gitignore
 └── README.md
@@ -86,7 +85,7 @@ rewriting the others:
    never writes SQL.
 2. **Service (`services.py`, `validators.py`, `roles.py`)**: checks input and
    permissions, then calls the database. It turns database errors into
-   application errors.
+   ValueError errors.
 3. **Data (`database.py`)**: owns the connection and schema. All queries use `?`
    placeholders, so user text is never pasted into SQL. The only interpolated
    names are table names, and those are checked against a whitelist first.

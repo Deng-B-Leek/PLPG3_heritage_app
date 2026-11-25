@@ -1,4 +1,3 @@
-from .errors import HeritageError
 from .roles import CREATE, DELETE, READ, ROLES, UPDATE
 from .services import EVENTS, TRADITIONS
 from .validators import MAX_SHORT_TEXT, clean_date, clean_record_id, clean_text
@@ -25,7 +24,7 @@ def ask_text(prompt, field, max_length=MAX_SHORT_TEXT):
         raw = input(prompt)
         try:
             return clean_text(raw, field, max_length)
-        except HeritageError as exc:
+        except ValueError as exc:
             print(f"  ! {exc} Please try again.")
 
 
@@ -34,7 +33,7 @@ def ask_date(prompt):
         raw = input(prompt)
         try:
             return clean_date(raw)
-        except HeritageError as exc:
+        except ValueError as exc:
             print(f"  ! {exc} Please try again.")
 
 
@@ -43,7 +42,7 @@ def ask_id(prompt):
         raw = input(prompt)
         try:
             return clean_record_id(raw)
-        except HeritageError as exc:
+        except ValueError as exc:
             print(f"  ! {exc} Please try again.")
 
 
@@ -52,7 +51,7 @@ def ask_description(service, prompt, exclude_id=None):
         raw = input(prompt)
         try:
             return service.check_description_available(raw, exclude_id)
-        except HeritageError as exc:
+        except ValueError as exc:
             print(f"  ! {exc} Please try again.")
 
 
@@ -63,7 +62,7 @@ def ask_text_default(prompt, current, field, max_length=MAX_SHORT_TEXT):
             return current
         try:
             return clean_text(raw, field, max_length)
-        except HeritageError as exc:
+        except ValueError as exc:
             print(f"  ! {exc} Please try again.")
 
 
@@ -74,7 +73,7 @@ def ask_date_default(prompt, current):
             return current
         try:
             return clean_date(raw)
-        except HeritageError as exc:
+        except ValueError as exc:
             print(f"  ! {exc} Please try again.")
 
 
@@ -85,7 +84,7 @@ def ask_description_default(service, prompt, current, record_id):
             return current
         try:
             return service.check_description_available(raw, record_id)
-        except HeritageError as exc:
+        except ValueError as exc:
             print(f"  ! {exc} Please try again.")
 
 
@@ -157,7 +156,7 @@ class HeritageCLI:
 
             try:
                 self.run_option(choice)
-            except HeritageError as exc:
+            except ValueError as exc:
                 print(f"  ! {exc}")
 
     def run_option(self, choice):
@@ -176,7 +175,7 @@ class HeritageCLI:
 
     def add_tradition(self):
         if not self.service.can(CREATE):
-            raise HeritageError("Your role cannot add records.")
+            raise ValueError("Your role cannot add records.")
         print("\n--- Add a cultural tradition ---")
         name = ask_text("Tradition name: ", "Tradition name")
         community = ask_text("Community: ", "Community")
@@ -186,7 +185,7 @@ class HeritageCLI:
 
     def record_event(self):
         if not self.service.can(CREATE):
-            raise HeritageError("Your role cannot add records.")
+            raise ValueError("Your role cannot add records.")
         print("\n--- Record a cultural event ---")
         event_name = ask_text("Event name: ", "Event name")
         event_date = ask_date("Event date (YYYY-MM-DD): ")
@@ -209,7 +208,7 @@ class HeritageCLI:
 
     def update_record(self):
         if not self.service.can(UPDATE):
-            raise HeritageError("Your role cannot update records.")
+            raise ValueError("Your role cannot update records.")
         table = pick_record_type("update")
         record_id = ask_id("Record ID to update: ")
         record = self.service.get_record(table, record_id)
@@ -232,7 +231,7 @@ class HeritageCLI:
 
     def delete_record(self):
         if not self.service.can(DELETE):
-            raise HeritageError("Your role cannot delete records.")
+            raise ValueError("Your role cannot delete records.")
         table = pick_record_type("delete")
         record_id = ask_id("Record ID to delete: ")
         record = self.service.get_record(table, record_id)
