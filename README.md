@@ -2,7 +2,6 @@
 
 A menu-driven Python command-line program that records cultural traditions and events in a SQLite database. Users can add, view, search, update, and delete records, depending on their role.
 
-Built by Group 3 for Peer Learning Project II (BSE Year 1, Trimester 2).
 
 ## 1. Why this app exists
 
